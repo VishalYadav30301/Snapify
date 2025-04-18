@@ -1,27 +1,27 @@
 import { Controller, Post, UseGuards, UseInterceptors, UploadedFile, Body, Request, Get, Param, Delete, Query } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { PhotosService } from './photos.service';
 import { UploadPhotoDto } from './dto/upload-photo.dto';
+import { AuthGuard1 } from '../auth/auth.guard';
 
 @Controller('photos')
-@UseGuards(JwtAuthGuard)
+@UseGuards(AuthGuard1)
 export class PhotosController {
   constructor(private readonly photosService: PhotosService) {}
 
   @Post('upload')
   @UseInterceptors(FileInterceptor('image'))
-  uploadPhoto(
+   async uploadPhoto(
     @UploadedFile() file: Express.Multer.File,
     @Body() body: UploadPhotoDto,
     @Request() req
   ) {
-    return this.photosService.uploadPhoto(file, body.caption, req.user.userId);
+    return this.photosService.uploadPhoto(file, body.caption, req.userId);
   }
 
   @Get()
   findAll(@Request() req, @Query('page') page: number = 1) {
-    return this.photosService.findAllByUser(req.user.userId, page);
+    return this.photosService.findAllByUser(req.userId, page);
   }
 
   @Get(':id')

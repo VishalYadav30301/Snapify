@@ -14,7 +14,7 @@ export class PhotosService {
   private idCounter = 1;
 
   async uploadPhoto(file: Express.Multer.File, caption: string, userId: string): Promise<any> {
-    const result = await this.uploadToCloudinary(file.buffer);
+    const result = await this.uploadToCloudinary(file);
     const photo = {
       id: this.idCounter++,
       url: result.secure_url,
@@ -49,19 +49,24 @@ export class PhotosService {
     return { message: 'Photo deleted successfully' };
   }
 
-  private uploadToCloudinary(fileBuffer: Buffer): Promise<UploadApiResponse> {
-    return new Promise((resolve, reject) => {
-      const uploadStream = this.cloudinary.uploader.upload_stream(
-        { resource_type: 'image' },
-        (error, result) => {
-          if (error) return reject(error);
-          resolve(result as UploadApiResponse);
-        }
-      );
-      const readable = new Readable();
-      readable.push(fileBuffer);
-      readable.push(null);
-      readable.pipe(uploadStream);
+  async uploadToCloudinary(file: Express.Multer.File): Promise<UploadApiResponse> {
+    // return new Promise((resolve, reject) => {
+    //   const uploadStream = this.cloudinary.uploader.upload_stream(
+    //     { resource_type: 'image' },
+    //     (error, result) => {
+    //       if (error) return reject(error);
+    //       resolve(result as UploadApiResponse);
+    //     }
+    //   );
+    //   const readable = new Readable();
+    //   readable.push(fileBuffer);
+    //   readable.push(null);
+    //   readable.pipe(uploadStream);
+    // });
+
+    return await v2.uploader.upload(file.path, {
+      folder: 'snapify',
+      resource_type: 'image',
     });
   }
 }

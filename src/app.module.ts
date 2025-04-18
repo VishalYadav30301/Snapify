@@ -8,11 +8,14 @@ import { SequelizeModule } from '@nestjs/sequelize';
 import { ConfigModule } from '@nestjs/config';
 import { CloudinaryModule } from './cloudinary/cloudinary.module';
 import dotenv from 'dotenv';
-
+import configuration from './config/configuration';
 
 @Module({
   imports: [
-    ConfigModule.forRoot({ isGlobal: true }),
+    ConfigModule.forRoot({ isGlobal: true,
+      envFilePath: '.env',
+      load: [configuration]
+    }),
     SequelizeModule.forRoot({
       dialect: 'postgres',
       host: process.env.DB_HOST,

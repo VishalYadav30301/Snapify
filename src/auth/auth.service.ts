@@ -22,7 +22,10 @@ export class AuthService {
       password: hashed,
       isAdmin: registerDto.isAdmin || false,
     }as any);
-    return this.getToken(user);
+    return {message:
+      "User registered successfully"
+    }
+    
   }
 
   async login(loginDto: LoginDto) {

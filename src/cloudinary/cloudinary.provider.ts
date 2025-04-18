@@ -2,14 +2,18 @@
 import { v2 as cloudinary } from 'cloudinary';
 import { ConfigService } from '@nestjs/config';
 
-export const CloudinaryProvider = {
+export const  CloudinaryProvider = {
   provide: 'CLOUDINARY',
+  isGlobal:true,
   useFactory: (configService: ConfigService) => {
     cloudinary.config({
-      cloud_name: configService.get<string>('Snapify'),
-      api_key: configService.get<string>('823411297919392'),
-      api_secret: configService.get<string>('l9vl6L4yNLclxzQQRK9HuoD9k_o'),
+      cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+      api_key: process.env.CLOUDINARY_API_KEY,
+      api_secret: process.env.CLOUDINARY_API_SECRET,
+
     });
+
+    console.log(configService.get<string>('cloud.name'));
     return cloudinary;
   },
   inject: [ConfigService],
