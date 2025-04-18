@@ -7,6 +7,8 @@ import { PhotosModule } from './photos/photos.module';
 import { SequelizeModule } from '@nestjs/sequelize';
 import { ConfigModule } from '@nestjs/config';
 import { CloudinaryModule } from './cloudinary/cloudinary.module';
+import dotenv from 'dotenv';
+
 
 @Module({
   imports: [

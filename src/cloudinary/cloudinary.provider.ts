@@ -6,9 +6,9 @@ export const CloudinaryProvider = {
   provide: 'CLOUDINARY',
   useFactory: (configService: ConfigService) => {
     cloudinary.config({
-      cloud_name: configService.get<string>('CLOUDINARY_NAME'),
-      api_key: configService.get<string>('CLOUDINARY_API_KEY'),
-      api_secret: configService.get<string>('CLOUDINARY_API_SECRET'),
+      cloud_name: configService.get<string>('Snapify'),
+      api_key: configService.get<string>('823411297919392'),
+      api_secret: configService.get<string>('l9vl6L4yNLclxzQQRK9HuoD9k_o'),
     });
     return cloudinary;
   },
