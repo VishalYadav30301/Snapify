@@ -5,8 +5,6 @@ import { SequelizeModule } from '@nestjs/sequelize';
 import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
 import { User } from '../schema/user.model';
-import { AuthRegisterDto } from './dto/auth-register.dto';
-import { AuthLoginDto } from './dto/auth-login.dto';
 import { ConfigService, ConfigModule } from '@nestjs/config';
 
 @Module({

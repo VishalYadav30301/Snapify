@@ -1,4 +1,5 @@
 import { Column, Model, Table } from 'sequelize-typescript';
+import { Roles } from '../admin/roles.decorator';
 
 @Table
 export class User extends Model<User> {
@@ -12,5 +13,5 @@ export class User extends Model<User> {
   declare password: string;
 
   @Column({ defaultValue: false })
-  declare isAdmin: boolean;
+  declare role: string;
 }

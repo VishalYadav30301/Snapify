@@ -3,8 +3,8 @@ import { JwtService } from '@nestjs/jwt';
 import { InjectModel } from '@nestjs/sequelize';
 import { User } from '../schema/user.model';
 import * as bcrypt from 'bcrypt';
-import { AuthRegisterDto as RegisterDto } from './dto/auth-register.dto';
-import { AuthLoginDto as LoginDto } from './dto/auth-login.dto';
+import {  RegisterDto } from './dto/auth-register.dto';
+import { LoginDto } from './dto/auth-login.dto';
 
 @Injectable()
 export class AuthService {
@@ -14,18 +14,20 @@ export class AuthService {
   ) {}
 
   async register(registerDto: RegisterDto) {
-    const { name, email, password} = registerDto;
+    const { name, email, password } = registerDto;
+    // Check if user already exists
+    const existingUser = await this.userModel.findOne({ where: { email } });
+    if (existingUser) {
+      throw new UnauthorizedException('User already exists');
+    }
     const hashed = await bcrypt.hash(password, 10);
-    const user = await this.userModel.create({ 
+    const user = await this.userModel.create({
       name: name,
       email: email,
       password: hashed,
-      isAdmin: registerDto.isAdmin || false,
-    }as any);
-    return {message:
-      "User registered successfully"
-    }
-    
+      role: 'user', // Default role
+    } as any);
+    return { message: 'User registered successfully' };
   }
 
   async login(loginDto: LoginDto) {
@@ -38,17 +40,23 @@ export class AuthService {
 
     return this.getToken(user);
   }
-  
 
   getToken(user: User) {
-    const payload = { sub: user.id, email: user.email, isAdmin: user.isAdmin };
-    console.log(user.id);
+    console.log(user.role);
+    const payload = { sub: user.id, email: user.email, role: user.role };
+
     return {
       access_token: this.jwtService.sign(payload),
     };
   }
-
   async getProfile(userId: number) {
-    return this.userModel.findByPk(userId, { attributes: { exclude: ['password'] } });
+    const user = await this.userModel.findByPk(userId, {
+      attributes: ['id', 'name', 'email', 'role'],
+    });
+    // Check if user exists
+    if (!user) {
+      throw new Error('User not found');
+    }
+    return user;
   }
 }

@@ -1,6 +1,8 @@
 import { Injectable, NotFoundException, UnauthorizedException, Inject } from '@nestjs/common';
+import { InjectModel } from '@nestjs/sequelize';
 import { v2 } from 'cloudinary';
 import type { UploadApiResponse } from 'cloudinary';
+import { Photo } from 'src/schema/photo.model';
 import { Readable } from 'stream';
 
 // 👇 Correctly infer the type from the actual v2 instance
@@ -8,7 +10,10 @@ type CloudinaryType = ReturnType<typeof v2.config> & typeof v2;
 
 @Injectable()
 export class PhotosService {
-  constructor(@Inject('CLOUDINARY') private cloudinary: CloudinaryType) {}
+  constructor(
+    @InjectModel(Photo) private readonly photoModel: typeof Photo, // Inject the Photo model
+    @Inject('CLOUDINARY') private cloudinary: CloudinaryType, // Inject the Cloudinary instance
+  ) {}
 
   private photos: any[] = [];
   private idCounter = 1;
@@ -23,17 +28,38 @@ export class PhotosService {
       public_id: result.public_id,
     };
     this.photos.push(photo);
-    return photo;
+    const savedPhoto = await this.photoModel.create({
+      caption,               
+      filename: file.originalname,
+      url: result.secure_url, 
+      size: file.size,        
+      createdAt: new Date(), 
+      updatedAt: new Date(),  
+      userId,               
+    });
+    return savedPhoto;
   }
 
-  async findAllByUser(userId: string, page: number): Promise<any[]> {
-    const pageSize = 10;
-    return this.photos.filter(p => p.userId === userId).slice((page - 1) * pageSize, page * pageSize);
+  async findAllByUser(userId: number, page: number) {
+    const limit = 10; // Number of photos per page
+    const offset = (page - 1) * limit;
+      return await this.photoModel.findAll({
+      where: { userId },
+      limit,
+      offset,
+      order: [['createdAt', 'DESC']],
+    });
   }
 
-  async findOne(id: number): Promise<any> {
-    const photo = this.photos.find(p => p.id === id);
-    if (!photo) throw new NotFoundException('Photo not found');
+  async findOne(id: number, userId: number): Promise<any> {
+    const photo = await this.photoModel.findOne({
+      where: { id, userId }, // Ensure the photo belongs to the logged-in user
+    });
+  
+    if (!photo) {
+      throw new Error('Photo not found or you do not have access to it');
+    }
+  
     return photo;
   }
 
